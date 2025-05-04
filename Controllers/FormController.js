@@ -73,6 +73,51 @@ class FormController {
             })
         }
     }
+
+    async update(req, res) {
+        try {
+            if(!req.params.id) {
+                throw {
+                    code: 400,
+                    message: "FORM_ID_REQUIRED"
+                }
+            }
+            if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+                throw {
+                    code: 400,
+                    message: "FORM_ID_INVALID"
+                }
+            }
+
+           
+            const forms = await Form.findOneAndUpdate({
+                _id: req.params.id,
+                userId: req.jwt.id
+            }, req.body, {
+                new: true
+            })
+
+            if(!forms) {
+                throw {
+                    code: 404,
+                    message: "FORM_NOT_FOUND"
+                }
+            }
+
+            return res.status(200).json({
+                status: true,
+                message: "FORM_UPDATED_SUCCESS",
+                data: forms
+            })
+
+           
+        }catch(error) {
+            return res.status(error.code || 500).json({
+                status: false,
+                message: error.message
+            })
+        }
+    }
 }
 
 export default new FormController()
